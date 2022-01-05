@@ -1,0 +1,324 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Mar 14 23:12:52 2020
+
+@author: Sumayya Munir
+"""
+import pandas as pd #used for handling dataset
+from sklearn.model_selection import train_test_split 
+from sklearn import model_selection
+import numpy as np
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import RandomizedSearchCV
+from sklearn.model_selection import cross_val_score
+import matplotlib.pyplot as plt
+import pandas
+from matplotlib import pyplot
+from sklearn import metrics
+from sklearn.metrics import classification_report, confusion_matrix
+from numpy import array
+
+#defining variables
+window = 60
+counter = 0
+rows=0
+precision = []
+positive_precision = []
+negative_precision = []
+window_size = []
+f1_Score = []
+test_accuracy = []
+train_accuracy = []
+columns=0
+#Retrain the neural network or not
+#Set value 1 to retrain, set value 0 to use existing model
+train = 0
+Test=0
+for x in range(59):
+    
+    window = (x+1)*5
+    pl = []
+    plTrigger = []  
+    predCorr = 0
+    predWrong = 0
+    df = pandas.DataFrame()
+    dfTest=pandas.DataFrame()
+    X_test_array=[]
+#    dfTest=pandas.DataFrame() 
+    df1 = pandas.read_csv('C:/Users/Sumayya Munir/Desktop/Unger/Models/DatasetsForModels/NATepSumayya/300_Fingerprint1.csv', nrows=600,skiprows=range(700,990),header=None )
+    df2= pandas.read_csv('C:/Users/Sumayya Munir/Desktop/Unger/Models/DatasetsForModels/NATepSumayya/300_Fingerprint2.csv',nrows=600, skiprows=range(700,990),header=None)
+    df3 = pandas.read_csv('C:/Users/Sumayya Munir/Desktop/Unger/Models/DatasetsForModels/NATepSumayya/300_Fingerprint3.csv',skiprows=range(700,990),header=None)
+    df4 = pandas.read_csv('C:/Users/Sumayya Munir/Desktop/Unger/Models/DatasetsForModels/NATepSumayya/300_Fingerprint4.csv',skiprows=range(700,990), header=None)
+    df5 = pandas.read_csv('C:/Users/Sumayya Munir/Desktop/Unger/Models/DatasetsForModels/NATepSumayya/300_Fingerprint5.csv', nrows=500,skiprows=range(700,990),header=None)
+    df6= pandas.read_csv('C:/Users/Sumayya Munir/Desktop/Unger/Models/DatasetsForModels/NATepSumayya/300_Fingerprint6.csv', nrows=500, header=None)
+    df7 = pandas.read_csv('C:/Users/Sumayya Munir/Desktop/Unger/Models/DatasetsForModels/NATepSumayya/300_Fingerprint7.csv', nrows=500, header=None)
+    df8= pandas.read_csv('C:/Users/Sumayya Munir/Desktop/Unger/Models/DatasetsForModels/NATepSumayya/300_Fingerprint8.csv', nrows=600,header=None)
+    df9 = pandas.read_csv('C:/Users/Sumayya Munir/Desktop/Unger/Models/DatasetsForModels/NATepSumayya/300_Fingerprint9.csv', skiprows=range(700,990),header=None)
+    df10 = pandas.read_csv('C:/Users/Sumayya Munir/Desktop/Unger/Models/DatasetsForModels/NATepSumayya/300_Fingerprint10.csv',nrows=400,header=None)
+    
+#    for y in range(1,11):
+#        if y==1: 
+#                 
+    df = df.append(df1)
+    df = df.append(df2)
+    df = df.append(df3)
+    df = df.append(df4)
+    df = df.append(df5)
+    df = df.append(df6)
+    df = df.append(df7)
+    df = df.append(df8)
+    df = df.append(df9)
+    
+    Test=dfTest.append(df10)
+    print("######## Finger print 1 is for testing ########")
+#                
+#        elif y==2: 
+#       
+#            #dfTest=pandas.DataFrame()  
+#            df = df.append(df1)
+#            df = df.append(df3)
+#            df = df.append(df4)
+#            df = df.append(df5)
+#            df = df.append(df6)
+#            df = df.append(df7)
+#            df = df.append(df8)
+#            df = df.append(df9)
+#            df = df.append(df10)
+#            dfTest.fillna(0)
+#            Test=dfTest.append(df2)
+#            print("######## Finger print 2 is for testing ########")
+#        
+##        elif y==3: 
+#           
+#            df = df.append(df1)
+#            df = df.append(df2)
+#            df = df.append(df4)
+#            df = df.append(df5)
+#            df = df.append(df6)
+#            df = df.append(df7)
+#            df = df.append(df8)
+#            df = df.append(df9)
+#            df = df.append(df10)
+#            Test=df3
+#            print("######## Finger print 3 is for testing ######## ")
+#        
+#        elif y==4: 
+#          
+#            df = df.append(df1)
+#            df = df.append(df2)
+#            df = df.append(df3)
+#            df = df.append(df5)
+#            df = df.append(df6)
+#            df = df.append(df7)
+#            df = df.append(df8)
+#            df = df.append(df9)
+#            df = df.append(df10)
+#            Test=df4
+#            print("######## Finger print 4 is for testing ########")
+#        
+#        elif y==5:  
+#          
+#            df = df.append(df1)
+#            df = df.append(df2)
+#            df = df.append(df3)
+#            df = df.append(df4)
+#            df = df.append(df6)
+#            df = df.append(df7)
+#            df = df.append(df8)
+#            df = df.append(df9)
+#            df = df.append(df10)
+#            Test=df5
+#            print("######## Finger print 5 is for testing ########")
+#        
+#        elif y==6:   
+#         
+#            df = df.append(df1)
+#            df = df.append(df2)
+#            df = df.append(df3)
+#            df = df.append(df4)
+#            df = df.append(df5)
+#            df = df.append(df7)
+#            df = df.append(df8)
+#            df = df.append(df9)
+#            df = df.append(df10)
+#            Test=df6
+#            print("######## Finger print 6 is for testing ######## ")
+#        
+#        elif y==7:   
+#           
+#            df = df.append(df1)
+#            df = df.append(df2)
+#            df = df.append(df3)
+#            df = df.append(df4)
+#            df = df.append(df5)
+#            df = df.append(df6)
+#            df = df.append(df8)
+#            df = df.append(df9)
+#            df = df.append(df10)
+#            Test=df7
+#            print("######## Finger print 7 is for testing ########")
+#        
+#        elif y==8:  
+#         
+#            df = df.append(df1)
+#            df = df.append(df2)
+#            df = df.append(df3)
+#            df = df.append(df4)
+#            df = df.append(df5)
+#            df = df.append(df6)
+#            df = df.append(df7)
+#            df = df.append(df9)
+#            df = df.append(df10)
+#            Test=df8
+#            print("######## Finger print 8 is for testing ########")
+#        
+#        elif y==9:   
+#           
+#            df = df.append(df1)
+#            df = df.append(df2)
+#            df = df.append(df3)
+#            df = df.append(df4)
+#            df = df.append(df5)
+#            df = df.append(df6)
+#            df = df.append(df7)
+#            df = df.append(df8)
+#            df = df.append(df10)
+#            Test=df9
+#            print("######## Finger print 9 is for testing ########")
+#        
+#        elif y==10: 
+#            
+#            df = df.append(df1)
+#            df = df.append(df2)
+#            df = df.append(df3)
+#            df = df.append(df4)
+#            df = df.append(df5)
+#            df = df.append(df6)
+#            df = df.append(df7)
+#            df = df.append(df8)
+#            df = df.append(df9)
+#            Test=df10
+#            print("######## Finger print 10 is for testing #######")            
+    #Get the count of columns
+    columns = len(df.columns) - 1
+    rows = len(Test.index)   
+    #Converts csv to array for train features
+    X_train_array = array(df.iloc[:,columns-(window+1):columns-1]) 
+    print(X_train_array.shape)
+    #Converts csv to array for train target feature
+    Y_train_array= array(df.iloc[:,columns])
+    print(Y_train_array.shape)
+     #Converts csv to array for test features
+    X_test_array=array(Test.iloc[:,columns-(window+1):columns-1])   
+     #Converts csv to array for test target features
+    Y_test_array= array(Test.iloc[:,columns])        
+    #random forest model creation
+    classifier = RandomForestClassifier(n_estimators=300, max_depth=50, max_features='sqrt')
+    model_data=classifier.fit(X_train_array,Y_train_array) #fitting the model for training data
+    for x in range(0,rows):
+            X_test = array(Test.iloc[x,columns-(window+1):columns-1])
+            X_test = X_test.reshape((1,window))           
+            Y_test=Test.iloc[x,columns]  
+            Y_test_predict = classifier.predict(X_test)
+            pl.append(float(Y_test_predict))                
+            if float(Y_test_predict) > 0.5:
+                trigger = 1
+            else:
+                trigger = 0                                               
+            if(int(Y_test)==trigger):
+                predCorr = predCorr + 1
+            else:
+                predWrong = predWrong + 1               
+            plTrigger.append(float(trigger * -1))      
+    
+    
+    plt.plot(plTrigger)
+    plt.plot(array(Test.iloc[:,columns]))
+    plt.plot(array(Test.iloc[:,columns-1]))
+  
+    plt.show()
+    print("Correct classify: ", predCorr)
+    print("Wrong classify: ", predWrong) 
+
+    # predictions on Train data
+    Y_train_Predict = classifier.predict(X_train_array)
+    tn1, fp1, fn1, tp1 = confusion_matrix(Y_train_array, Y_train_Predict).ravel()
+    matrics1=confusion_matrix(Y_train_array,Y_train_Predict)
+    print("********Confusion MAtrics for Train set********")
+    print(matrics1)
+    print("True Negatives: ",tn1)
+    print("False Positives: ",fp1)
+    print("False Negatives: ",fn1)
+    print("True Positives: ",tp1)
+    accuracy1=metrics.accuracy_score(Y_train_array,Y_train_Predict)
+    print("Train Accuracy=========")
+    train_accuracy.append(accuracy1)
+    print(train_accuracy)
+    print('---------------------------------------\n')  
+    
+     #predictions on Test data
+    Y_test_Predict = classifier.predict(X_test_array)
+    tn2, fp2, fn2, tp2 = confusion_matrix(Y_test_array, Y_test_Predict).ravel()
+    matrics2=confusion_matrix(Y_test_array, Y_test_Predict)
+    print("*******Confusion MAtrics for Test set********")
+    print(matrics2)
+    print("True Negatives: ",tn2)
+    print("False Positives: ",fp2)
+    print("False Negatives: ",fn2)
+    print("True Positives: ",tp2)
+    accuracy2=metrics.accuracy_score(Y_test_array ,Y_test_Predict)
+    print("Test Accuracy=========")
+    test_accuracy.append(accuracy2)
+    print(test_accuracy)
+    print('---------------------------------------\n') 
+    
+#    f1_score=metrics.f1_score(Y_test_array,Y_test_Predict)
+#    precision=metrics.precision_score(Y_test_array,Y_test_Predict)    
+#    #precision1=tp2/tp2+fp2
+#    #precision0=tn2/tn2+fn2
+##    positive_precision.append(float(precision1))
+##    negative_precision.append(float(precision0))
+##    print("Positive Precision on Y",precision1)
+##    print("Negative Precision on Y",precision0)
+##plt.figure(figsize=(30,30))
+##plt.title("Positive Precision") # Name title of the graph
+##plt.xlabel('Window') # Assign the name of the x axis
+##plt.ylabel("Positive Precision") # Assign the name of the y axis
+##plt.bar(window_size, precision1, width=3,  color='red') # Change bar color
+##plt.xticks(window_size)
+##plt.yticks(precision1)
+##plt.show()
+##plt.figure(figsize=(30,30))
+##plt.title("Negative Precision") # Name title of the graph
+##plt.xlabel('Window') # Assign the name of the x axis
+##plt.ylabel("Negative Precision") # Assign the name of the y axis
+##plt.bar(window_size, precision0 , width=3, color='blue') # Change bar color
+##plt.xticks(window_size)
+##plt.yticks(precision0)
+##plt.show()
+   
+plt.figure(figsize=(35,20)) 
+plt.plot(window_size, train_accuracy, 'g', label='Training accuracy')
+plt.plot(window_size, test_accuracy, 'b', label='validation accuracy')
+plt.title('Training and Test accuracy')
+plt.xlabel('Window Size')
+plt.ylabel('Accuracy')
+plt.xticks(window_size)
+plt.legend()
+plt.show()   
+
+     
+#Classification Error
+#print('\n')
+#classification_error=1-metrics.accuracy_score(Y_test,Y_test_Predict)
+#print("==========Claffification Error=========")
+#print(classification_error)
+#
+##classification report tells the accuracy of the model
+#print('\n')
+#classification_result=classification_report(Y_test,Y_test_Predict)
+#print("=========Classification Report======")
+#print(classification_result)
+##plt.plot(p,Y_predict)
+        
+        
